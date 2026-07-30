@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+<meta charset="UTF-8">
+<title>翻牌配對遊戲</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+
+    #game {
+        text-align: center;
+    }
+
+    .board {
+        display: grid;
+        grid-template-columns: repeat(4, 100px);
+        grid-gap: 10px;
+        margin-top: 20px;
+    }
+
+    .card {
+        width: 100px;
+        height: 100px;
+        background-image: url('pic/cover.png');
+        background-size: cover;
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+<div id="game">
+    <button id="startButton">開始遊戲</button>
+    <div id="time">時間：00:00</div>
+    <div id="board" class="board"></div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const board = document.getElementById('board');
+    const startButton = document.getElementById('startButton');
+    const timeDisplay = document.getElementById('time');
+    let cardsChosen = [];
+    let cardsChosenId = [];
+    let cardsWon = [];
+    let time = 0;
+    let timer;
+
+    const cardArray = [
+        { name: 'a1', img: 'pic/a1.png' },
+        { name: 'a2', img: 'pic/a2.png' },
+        { name: 'a3', img: 'pic/a3.png' },
+        { name: 'a4', img: 'pic/a4.png' },
+        { name: 'a5', img: 'pic/a5.png' },
+        { name: 'a6', img: 'pic/a6.png' },
+        { name: 'a7', img: 'pic/a7.png' },
+        { name: 'a8', img: 'pic/a8.png' },
+        { name: 'a1', img: 'pic/a1.png' },
+        { name: 'a2', img: 'pic/a2.png' },
+        { name: 'a3', img: 'pic/a3.png' },
+        { name: 'a4', img: 'pic/a4.png' },
+        { name: 'a5', img: 'pic/a5.png' },
+        { name: 'a6', img: 'pic/a6.png' },
+        { name: 'a7', img: 'pic/a7.png' },
+        { name: 'a8', img: 'pic/a8.png' }
+    ];
+
+    function createBoard() {
+        cardArray.sort(() => 0.5 - Math.random());
+        for (let i = 0; i < cardArray.length; i++) {
+            const card = document.createElement('div');
+            card.setAttribute('class', 'card');
+            card.setAttribute('data-id', i);
+            card.addEventListener('click', flipCard);
+            board.appendChild(card);
+        }
+    }
+
+    function flipCard() {
+        let cardId = this.getAttribute('data-id');
+        cardsChosen.push(cardArray[cardId].name);
+        cardsChosenId.push(cardId);
+        this.style.backgroundImage = `url(${cardArray[cardId].img})`;
+        if (cardsChosen.length === 2) {
+            setTimeout(checkForMatch, 500);
+        }
+    }
+
+    function checkForMatch() {
+        const cards = document.querySelectorAll('.card');
+        const optionOneId = cardsChosenId[0];
+        const optionTwoId = cardsChosenId[1];
+        
+        if (optionOneId == optionTwoId) {
+            cards[optionOneId].style.backgroundImage = 'url(pic/cover.png)';
+            cards[optionTwoId].style.backgroundImage = 'url(pic/cover.png)';
+            alert('You have clicked the same image!');
+        } else if (cardsChosen[0] === cardsChosen[1]) {
+            alert('You found a match');
+            cards[optionOneId].removeEventListener('click', flipCard);
+            cards[optionTwoId].removeEventListener('click', flipCard);
+            cardsWon.push(cardsChosen);
+        } else {
+            cards[optionOneId].style.backgroundImage = 'url(pic/cover.png)';
+            cards[optionTwoId].style.backgroundImage = 'url(pic/cover.png)';
+        }
+        cardsChosen = [];
+        cardsChosenId = [];
+        if (cardsWon.length === cardArray.length/2) {
+            clearInterval(timer);
+            alert('Congratulations! You found them all!');
+            timeDisplay.textContent += ' 遊戲結束！';
+        }
+    }
+
+    function updateTime() {
+        time++;
+        let minutes = Math.floor(time / 60);
+        let seconds = time % 60;
+        timeDisplay.textContent = `時間：${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    startButton.addEventListener('click', () => {
+        cardsWon = [];
+        cardsChosen = [];
+        cardsChosenId = [];
+        time = 0;
+        clearInterval(timer);
+        timer = setInterval(updateTime, 1000);
+        board.innerHTML = '';
+        createBoard();
+    });
+});
+</script>
+</body>
+</html>
